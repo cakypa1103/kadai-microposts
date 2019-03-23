@@ -1,5 +1,15 @@
-<ul class="media-list">
-    @foreach ($microposts as $micropost)
+@extends('layouts.app')
+
+@section('content')
+    <div class="row">
+        <aside class="col-sm-4">
+            @include('users.card', ['user' => $user])
+        </aside>
+        <div class="col-sm-8">
+            @include('users.navtabs', ['user' => $user])
+            
+@if (count($users_favorites) > 0)
+    @foreach ($users_favorites as $micropost)
         <li class="media mb-3">
             <img class="mr-2 rounded" src="{{ Gravatar::src($micropost->user->email, 50) }}" alt="">
             <div class="media-body">
@@ -21,5 +31,7 @@
             </div>
         </li>
     @endforeach
-</ul>
-{{ $microposts->render('pagination::bootstrap-4') }}
+@endif
+        </div>
+    </div>
+@endsection

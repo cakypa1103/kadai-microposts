@@ -10,7 +10,7 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+// 初期画面
 Route::get('/', 'MicropostsController@index');
 
 // ユーザ登録
@@ -26,13 +26,21 @@ Route::get('logout', 'Auth\LoginController@logout')->name('logout.get');
 Route::group(['middleware' => ['auth']], function () {
     Route::resource('users', 'UsersController', ['only' => ['index', 'show']]);
     
-    //フォロー・フォロワー
-    Route::group(['prefix' => 'users/{id}'], function () {
-        Route::post('follow', 'UserFollowController@store')->name('user.follow');
-        Route::delete('unfollow', 'UserFollowController@destroy')->name('user.unfollow');
-        Route::get('followings', 'UsersController@followings')->name('users.followings');
-        Route::get('followers', 'UsersController@followers')->name('users.followers');
-    });    
+// フォロー・フォロワー
+Route::group(['prefix' => 'users/{id}'], function () {
+    Route::post('follow', 'UserFollowController@store')->name('user.follow');
+    Route::delete('unfollow', 'UserFollowController@destroy')->name('user.unfollow');
+    Route::get('followings', 'UsersController@followings')->name('users.followings');
+    Route::get('followers', 'UsersController@followers')->name('users.followers');
+    Route::get('favolist', 'UsersController@favorites')->name('users.favolist'); 
+});
+
+
+// お気に入り
+Route::group(['prefix' => 'microposts/{id}'], function () {
+    Route::post('yes_favorites', 'FavoritesController@store')->name('favorites.yes_favorites');
+    Route::delete('no_favorites', 'FavoritesController@destroy')->name('favorites.no_favorites');
+});
     
-    Route::resource('microposts', 'MicropostsController', ['only' => ['store', 'destroy']]);
+Route::resource('microposts', 'MicropostsController', ['only' => ['store', 'destroy']]);
 });

@@ -35,12 +35,16 @@ class User extends Authenticatable
     public function followings()
     {
         return $this->belongsToMany(User::class, 'user_follow', 'user_id', 'follow_id')->withTimestamps();
-        
     }
     
     public function followers()
     {
         return $this->belongsToMany(User::class, 'user_follow', 'follow_id', 'user_id')->withTimestamps();
+    }
+    
+    public function favorites()
+    {
+        return $this->belongsToMany(Micropost::class, 'favorites', 'user_id', 'micropost_id')->withTimestamps();
     }
     
     public function follow($userId)
@@ -77,9 +81,54 @@ class User extends Authenticatable
         }
     }
     
+    public function yes_favorites($micropostsId)
+    {
+        // 既にお気に入りしているかの確認
+        $exist = $this->is_favorites($micropostsId);
+        // 投稿が自分自身ではないかの確認
+        // マイクロポストのユーザーを取り出す
+        $micropost = Micropost::find($micropostsId);
+        $its_me = $this->id == $micropost->user_id;
+    
+        if ($exist || $its_me) {
+            // 既にお気に入りしていれば何もしない
+            return false;
+        } else {
+            // 未お気に入りであれば追加する
+            $this->favorites()->attach($micropostsId);
+            return true;
+        }
+    }
+    
+    public function no_favorites($micropostsId)
+    {
+        // 既にお気に入りしているかの確認
+        $exist = $this->is_favorites($micropostsId);
+        // 投稿が自分自身ではないかの確認
+        // マイクロポストのユーザーを取り出す
+        $micropost = Micropost::find($micropostsId);
+        $its_me = $this->id == $micropost->user_id;
+    
+        if ($exist && !$its_me) {
+            // 既にお気に入りしていればお気に入りを外す
+            $this->favorites()->detach($micropostsId);
+            return true;
+        } else {
+            // 未お気に入りであれば何もしない
+            return false;
+        }
+    }
+    
     public function is_following($userId)
     {
+        // 既存のフォローと照合し、True、Falseを返す
         return $this->followings()->where('follow_id', $userId)->exists();
+    }
+    
+    public function is_favorites($micropostsId)
+    {
+        // 既存のフォローと照合し、True、Falseを返す
+        return $this->favorites()->where('micropost_id', $micropostsId)->exists();
     }
     
     public function feed_microposts()
